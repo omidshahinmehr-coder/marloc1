@@ -65,8 +65,6 @@ class TrackerSettingsActivity : LockProtectedActivity() {
 
     private val backgroundLocationLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            // Whether granted or not, proceed — foreground-only will still work
-            // for the sendloc reply while the app is running.
             finishSetup()
         }
 
@@ -136,15 +134,15 @@ class TrackerSettingsActivity : LockProtectedActivity() {
 
         Toast.makeText(this, "در حال دریافت موقعیت فعلی...", Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            val location = LocationHelper.getCurrentLocation(this@TrackerActivity)
+            val location = LocationHelper.getCurrentLocation(this@TrackerSettingsActivity)
             if (location == null) {
-                Toast.makeText(this@TrackerActivity, "دریافت موقعیت فعلی ممکن نشد", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TrackerSettingsActivity, "دریافت موقعیت فعلی ممکن نشد", Toast.LENGTH_SHORT).show()
                 return@launch
             }
             settings.saveGeofenceCenter(location.latitude, location.longitude)
-            settings.saveGeofenceState("inside") // assume we're starting inside our own defined center
+            settings.saveGeofenceState("inside")
             updateGeofenceCenterText()
-            Toast.makeText(this@TrackerActivity, "مرکز حصار جغرافیایی ثبت شد", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@TrackerSettingsActivity, "مرکز حصار جغرافیایی ثبت شد", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -258,9 +256,6 @@ class TrackerSettingsActivity : LockProtectedActivity() {
     }
 
     private fun finishSetup() {
-        // The location-log timer always runs, independent of the SMS
-        // auto-send switch. It also handles SIM-change detection and
-        // geofence checks on every tick.
         LogWorkScheduler.schedule(this, settings.getLogIntervalMinutes())
 
         if (autoSendSwitch.isChecked) {
